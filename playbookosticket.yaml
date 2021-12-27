@@ -1,4 +1,17 @@
-   - name: install apache2 
+---
+
+#Installatie van Osticket
+- name: Benodigheden voor osticket installeren/configureren 
+  hosts: Debian
+  tasks:
+  #installatie mariadb
+    - name: Install Mariadb 
+      apt: 
+        name: mariadb-server
+        state: present
+      become: true
+#installatie apache2
+    - name: install apache2 
       apt:
         name: apache2
         state: present
@@ -15,7 +28,8 @@
         name: apache2.service
         enabled: yes
       become: true
-
+      
+#install allerlei voor installatie van internet
     - name: install curl, wget, unzip
       ansible.builtin.shell:
         cmd: curl wget unzip
