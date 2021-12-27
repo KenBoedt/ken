@@ -1,0 +1,69 @@
+   - name: install apache2 
+      apt:
+        name: apache2
+        state: present
+      become: true
+
+    - name: restart apcache2.service
+      service: 
+        name: apache2.service
+        state: restarted
+      become: true
+
+    - name: enable apcache2.service
+      ansible.builtin.service:
+        name: apache2.service
+        enabled: yes
+      become: true
+
+    - name: install curl, wget, unzip
+      ansible.builtin.shell:
+        cmd: curl wget unzip
+      become: true
+
+    - name: download osTicket.zip file
+      ansible.builtin.shell:
+        chdir: /home/Desktop/
+        cmd: curl -s https://api.github.com/repos/osTicket/osTicket/releases/latest \ | grep browser_download_url \ | grep "browser_download_url" \ | cut -d '"' -f 4 \ | wget -i -
+      become: true
+
+    - name: unzipping the osTicket.zip file
+      ansible.builtin.shell:
+        cmd: unzip osTicket-v1.15.4.zip -d /var/www/osTicket
+      become: true
+    
+    - name: create osticket config file
+      ansible.builtin.shell:
+        chdir: /var/www/osTicket/upload/include/
+        cmd: cp ost-sampleconfig.php ost-config.php
+      become: true  
+
+    - name: change ownership from var/www/
+      ansible.builtin.shell:
+        cmd: chown -R www-data:www-data /var/www/
+      become: true
+
+    - name: create osticket config file + configure
+      ansible.builtin.file:
+        dest: '/etc/apache2/sites-enabled/osticet.conf'
+        state: touch
+
+    - name: edit osticket.conf file
+      blockinfile:
+        block: |
+           <VirtualHost *:80>
+               ServerAdmin admin@example.com
+               DocumentRoot /var/www/osTicket/upload
+               ServerName 203.0.113.210 #IP ADDRESS VAN TOESTEL
+               ServerAlias osticket.amai.test
+               <Directory /var/www/osTicket/>
+                   Option FollowSymlinks
+                   AllowOverride All
+                   Require all granted
+               </Directory>
+
+               ErrorLog ${APACHE-LOG-DIR}/osticket_error.log
+               CustomLog ${APACHE-LOG-DIR}/osticket_access.log combined
+           </VirtualHost>
+        dest: /etc/rsyslog.conf
+      become: true

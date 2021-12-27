@@ -1,0 +1,12 @@
+---
+#Dit is een YAML playbook voor het installeren van htop op hosts in onze inventory
+- name: Dit is een playbo
+  hosts: servers
+  gather_facts: true # true is defailt
+ 
+  tasks:
+   - name: Ensure htop is installed
+     become: true
+     ansible.builtin.package:
+      name: htop
+      state: present 
